@@ -101,7 +101,7 @@ if (!username || !room) {
 updateRoomUI(room);
 
 /* ------------------ SOCKET ------------------ */
-const socket = new WebSocket("ws://localhost:8000/ws");
+const ws = new WebSocket("wss://chatterbox-kil7.onrender.com/ws");
 
 socket.onopen = () => {
   socket.send(JSON.stringify({ type: "join", username, room }));
@@ -258,3 +258,4 @@ function scrollToBottom() {
 
 </body>
 </html>
+
