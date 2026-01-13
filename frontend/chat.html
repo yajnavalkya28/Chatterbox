@@ -79,7 +79,7 @@ const roomBtn = document.getElementById("roomBtn");
 
 roomLabel.textContent = room;
 
-/* ---------- SOCKET ---------- */
+/* ---------- SOCKET (LOCAL + DEPLOY SAFE) ---------- */
 const WS_URL = location.hostname === "localhost"
   ? "ws://localhost:8000/ws"
   : "wss://chatterbox-kil7.onrender.com/ws";
@@ -103,14 +103,12 @@ ws.onmessage = (e) => {
     renderSystem(data.message, data.time);
   }
 
-  if (data.type === "typing") {
-    if (data.username !== username) {
-      typingDiv.innerHTML = `
-        <span>${data.username} is typing</span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>`;
-    }
+  if (data.type === "typing" && data.username !== username) {
+    typingDiv.innerHTML = `
+      <span>${data.username} is typing</span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>`;
   }
 
   if (data.type === "stop_typing") {
@@ -159,7 +157,8 @@ function renderMessage(user, text, time) {
       user === username ? "bg-indigo-500 text-white" : "bg-slate-200"
     }">
       <strong>${user}</strong>
-      <span class="text-xs opacity-70 ml-2">${time}</span><br>${text}
+      <span class="text-xs opacity-70 ml-2">${time}</span><br>
+      ${text}
     </div>`;
   messages.appendChild(div);
   scrollBottom();
