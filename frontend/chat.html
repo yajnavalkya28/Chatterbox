@@ -44,6 +44,12 @@
   </div>
 </div>
 
+<!-- ONLINE USERS -->
+<div id="onlineBar" class="hidden px-4 py-3 bg-slate-50 flex items-center justify-between border-b">
+  <div id="avatars" class="flex -space-x-2"></div>
+  <span id="memberCount" class="text-sm text-slate-500"></span>
+</div>
+
 <!-- MESSAGES -->
 <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4">
   <div id="emptyState" class="text-center text-slate-500 text-sm">
@@ -69,7 +75,6 @@
 /* ================= SESSION ================= */
 const username = sessionStorage.getItem("username");
 let room = sessionStorage.getItem("room") || "General";
-
 if (!username) location.href = "index.html";
 sessionStorage.setItem("room", room);
 
@@ -81,13 +86,16 @@ const roomLabel = document.getElementById("roomLabel");
 const roomMenu = document.getElementById("roomMenu");
 const roomBtn = document.getElementById("roomBtn");
 
+const onlineBar = document.getElementById("onlineBar");
+const avatarsDiv = document.getElementById("avatars");
+const memberCount = document.getElementById("memberCount");
+
 roomLabel.textContent = room;
 
-/* Room-wise message store (user + system) */
 const roomMessages = JSON.parse(sessionStorage.getItem("roomMessages")) || {};
 
-let typingTimeout = null;
-let isTyping = false;
+/* ===== REAL-TIME TYPING STATE ===== */
+let typingInterval = null;
 
 /* ================= SOCKET ================= */
 const WS_URL =
@@ -105,22 +113,17 @@ ws.onmessage = (e) => {
   const data = JSON.parse(e.data);
 
   if (data.type === "chat") {
-    storeMessage(room, {
-      kind: "chat",
-      user: data.username,
-      text: data.message,
-      time: data.time
-    });
+    storeMessage(room, { kind:"chat", user:data.username, text:data.message, time:data.time });
     renderChat(data.username, data.message, data.time);
   }
 
   if (data.type === "system") {
-    storeMessage(room, {
-      kind: "system",
-      text: data.message,
-      time: data.time
-    });
+    storeMessage(room, { kind:"system", text:data.message, time:data.time });
     renderSystem(data.message, data.time);
+  }
+
+  if (data.type === "users") {
+    updateUsers(data.users);
   }
 
   if (data.type === "typing" && data.username !== username) {
@@ -132,18 +135,23 @@ ws.onmessage = (e) => {
   }
 };
 
-/* ================= INPUT EVENTS ================= */
+/* ================= INPUT EVENTS (REAL-TIME) ================= */
 input.addEventListener("input", () => {
-  if (!isTyping) {
+  const hasText = input.value.trim().length > 0;
+
+  if (hasText && !typingInterval) {
     ws.send(JSON.stringify({ type: "typing" }));
-    isTyping = true;
+
+    typingInterval = setInterval(() => {
+      ws.send(JSON.stringify({ type: "typing" }));
+    }, 500); // heartbeat
   }
 
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
+  if (!hasText && typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
     ws.send(JSON.stringify({ type: "stop_typing" }));
-    isTyping = false;
-  }, 900);
+  }
 });
 
 input.addEventListener("keydown", (e) => {
@@ -164,6 +172,7 @@ roomMenu.querySelectorAll("div").forEach(item => {
 
     messagesDiv.innerHTML = "";
     hideTyping();
+    onlineBar.classList.add("hidden");
     renderRoomMessages(room);
 
     ws.send(JSON.stringify({ type: "switch_room", room }));
@@ -172,12 +181,37 @@ roomMenu.querySelectorAll("div").forEach(item => {
 });
 
 /* ================= FUNCTIONS ================= */
+function updateUsers(users) {
+  avatarsDiv.innerHTML = "";
+  if (!users || users.length === 0) {
+    onlineBar.classList.add("hidden");
+    return;
+  }
+  onlineBar.classList.remove("hidden");
+
+  users.forEach(u => {
+    const a = document.createElement("div");
+    a.className =
+      "w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white";
+    a.textContent = u[0].toUpperCase();
+    avatarsDiv.appendChild(a);
+  });
+
+  memberCount.textContent = users.length + " member" + (users.length>1?"s":"");
+}
+
 function sendMessage() {
   if (!input.value.trim()) return;
-  ws.send(JSON.stringify({ type: "chat", message: input.value }));
-  ws.send(JSON.stringify({ type: "stop_typing" }));
+
+  ws.send(JSON.stringify({ type:"chat", message:input.value }));
+
+  if (typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
+    ws.send(JSON.stringify({ type:"stop_typing" }));
+  }
+
   input.value = "";
-  isTyping = false;
 }
 
 function storeMessage(room, msg) {
@@ -188,8 +222,6 @@ function storeMessage(room, msg) {
 
 function renderChat(user, text, time) {
   removeEmpty();
-  const safeTime = time || currentTime();
-
   const div = document.createElement("div");
   div.className = user === username ? "text-right" : "text-left";
   div.innerHTML = `
@@ -197,7 +229,7 @@ function renderChat(user, text, time) {
       user === username ? "bg-indigo-500 text-white" : "bg-slate-200"
     }">
       <strong>${user}</strong>
-      <span class="text-xs opacity-70 ml-2">${safeTime}</span><br>
+      <span class="text-xs opacity-70 ml-2">${time || currentTime()}</span><br>
       ${text}
     </div>`;
   messagesDiv.appendChild(div);
@@ -206,28 +238,26 @@ function renderChat(user, text, time) {
 
 function renderSystem(text, time) {
   removeEmpty();
-  const safeTime = time || currentTime();
   const div = document.createElement("div");
   div.className = "text-center text-xs text-slate-500";
-  div.textContent = `${text} • ${safeTime}`;
+  div.textContent = `${text} • ${time || currentTime()}`;
   messagesDiv.appendChild(div);
   scrollBottom();
 }
 
 function renderRoomMessages(room) {
   if (!roomMessages[room] || roomMessages[room].length === 0) {
-    messagesDiv.innerHTML = `<div id="emptyState" class="text-center text-slate-500 text-sm">
-      No messages yet. Start the conversation 👋</div>`;
+    messagesDiv.innerHTML =
+      `<div id="emptyState" class="text-center text-slate-500 text-sm">
+        No messages yet. Start the conversation 👋
+      </div>`;
     return;
   }
-
-  roomMessages[room].forEach(m => {
-    if (m.kind === "chat") {
-      renderChat(m.user, m.text, m.time);
-    } else {
-      renderSystem(m.text, m.time);
-    }
-  });
+  roomMessages[room].forEach(m =>
+    m.kind === "chat"
+      ? renderChat(m.user, m.text, m.time)
+      : renderSystem(m.text, m.time)
+  );
 }
 
 function showTyping(user) {
@@ -256,10 +286,9 @@ function scrollBottom() {
 }
 
 function currentTime() {
-  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
 }
 
-/* Load messages on first open */
 renderRoomMessages(room);
 </script>
 
