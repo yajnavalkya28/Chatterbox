@@ -1,399 +1,507 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Chatterbox</title>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-.room-General,.room-Tech,.room-Fun{color:white}
-
-.typing-wrapper{display:flex;align-items:center;gap:8px}
-.typing-dots{display:flex;gap:4px}
-
-.typing-dot{
-  width:6px;height:6px;background:#10b981;border-radius:9999px;
-  animation:typingBounce 1.4s infinite ease-in-out;
-}
-.typing-dot:nth-child(2){animation-delay:.2s}
-.typing-dot:nth-child(3){animation-delay:.4s}
-
-@keyframes typingBounce{
-  0%,80%,100%{transform:translateY(0);opacity:.4}
-  40%{transform:translateY(-6px);opacity:1}
-}
-/* ===== IMPROVED BACKGROUND BUBBLES ===== */
-.bubble-bg {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.bubble {
-  position: absolute;
-  bottom: -120px;
-  background: rgba(99, 102, 241, 0.18); /* indigo soft */
-  border-radius: 9999px;
-  filter: blur(0.3px);
-  animation: floatUp linear infinite;
-}
-
-@keyframes floatUp {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-50vh) translateX(15px);
-  }
-  100% {
-    transform: translateY(-120vh) translateX(-15px);
-    opacity: 0;
-  }
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatterbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .typing-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 9999px;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typingBounce {
+            0%, 80%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            40% {
+                transform: translateY(-6px);
+                opacity: 1;
+            }
+        }
+        .bubble-bg {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -120px;
+            background: rgba(99, 102, 241, 0.18);
+            border-radius: 9999px;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120vh);
+                opacity: 0;
+            }
+        }
+        .message-wrapper {
+            position: relative;
+            display: flex;
+            margin-bottom: 12px;
+        }
+        .message-bubble {
+            position: relative;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .message-wrapper:hover .delete-btn {
+            opacity: 1;
+        }
+        .deleted-message {
+            font-style: italic;
+            opacity: 0.6;
+        }
+    </style>
 </head>
-
 <body class="bg-slate-100 h-screen flex items-center justify-center">
+    <div class="bubble-bg">
+        <span class="bubble w-4 h-4 left-[5%] animate-[floatUp_14s_linear_infinite]"></span>
+        <span class="bubble w-10 h-10 left-[15%] animate-[floatUp_26s_linear_infinite]"></span>
+        <span class="bubble w-6 h-6 left-[40%] animate-[floatUp_22s_linear_infinite]"></span>
+        <span class="bubble w-10 h-10 left-[92%] animate-[floatUp_30s_linear_infinite]"></span>
+    </div>
 
-<!-- BACKGROUND BUBBLES -->
-<!-- BACKGROUND BUBBLES -->
-<div class="bubble-bg">
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg flex flex-col h-[90vh] relative z-10">
+        <!-- HEADER -->
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="text-xl font-bold">💬 Chatterbox</h2>
+            <div class="flex gap-2">
+                <button id="roomBtn" 
+                    class="bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 ease-out hover:scale-105 active:scale-95">
+                    <span id="roomLabel">General</span> ⌄
+                </button>
+                <button onclick="leaveChat()" 
+                    class="bg-white/20 px-4 py-2 rounded-full hover:bg-red-500 transition-all duration-300">
+                    Leave
+                </button>
+            </div>
+            <div id="roomMenu" 
+                class="hidden absolute right-6 top-16 bg-white rounded-lg shadow-lg w-40 text-slate-700 z-50">
+                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="General">General</div>
+                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Tech">Tech</div>
+                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Fun">Fun</div>
+            </div>
+        </div>
 
-  <!-- LEFT SIDE -->
-  <span class="bubble w-4 h-4 left-[5%]  animate-[floatUp_14s_linear_infinite]"></span>
-  <span class="bubble w-6 h-6 left-[10%] animate-[floatUp_20s_linear_infinite]"></span>
-  <span class="bubble w-10 h-10 left-[15%] animate-[floatUp_26s_linear_infinite]"></span>
-  <span class="bubble w-5 h-5 left-[18%] animate-[floatUp_18s_linear_infinite]"></span>
+        <!-- ONLINE USERS -->
+        <div id="onlineBar" class="hidden px-4 py-3 bg-slate-50 flex items-center justify-between border-b">
+            <div id="avatars" class="flex -space-x-2"></div>
+            <span id="memberCount" class="text-sm text-slate-500"></span>
+        </div>
 
-  <!-- CENTER (LESS DENSE) -->
-  <span class="bubble w-6 h-6 left-[40%] animate-[floatUp_22s_linear_infinite]"></span>
-  <span class="bubble w-8 h-8 left-[55%] animate-[floatUp_28s_linear_infinite]"></span>
+        <!-- MESSAGES -->
+        <div id="messages" class="flex-1 overflow-y-auto p-4">
+            <div id="emptyState" class="text-center text-slate-500 text-sm">No messages yet. 👋</div>
+        </div>
 
-  <!-- RIGHT SIDE -->
-  <span class="bubble w-4 h-4 left-[82%] animate-[floatUp_15s_linear_infinite]"></span>
-  <span class="bubble w-6 h-6 left-[87%] animate-[floatUp_21s_linear_infinite]"></span>
-  <span class="bubble w-10 h-10 left-[92%] animate-[floatUp_30s_linear_infinite]"></span>
-  <span class="bubble w-5 h-5 left-[96%] animate-[floatUp_19s_linear_infinite]"></span>
+        <!-- TYPING INDICATOR -->
+        <div id="typing" class="px-4 h-7 text-slate-500 text-sm"></div>
 
-</div>
+        <!-- MEDIA TRAY -->
+        <div id="mediaTray" 
+            class="hidden mx-4 flex items-center gap-3 p-2 bg-slate-50 rounded-lg border border-dashed border-indigo-300">
+            <span id="mediaName" class="text-xs text-indigo-600 font-medium truncate flex-1"></span>
+            <button onclick="clearMedia()" class="text-red-500 text-sm px-2">✕</button>
+        </div>
 
+        <!-- INPUT -->
+        <div class="p-4 border-t flex gap-2 items-center">
+            <label class="cursor-pointer hover:bg-slate-200 p-2 rounded-full transition">
+                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*">
+                <span class="text-xl">📎</span>
+            </label>
+            <button id="micBtn" class="hover:bg-slate-200 p-2 rounded-full transition text-xl">🎙️</button>
+            <input id="input" 
+                class="flex-1 px-5 py-3 rounded-full bg-slate-100 focus:ring-2 focus:ring-indigo-400 outline-none" 
+                placeholder="Type a message...">
+            <button onclick="sendMessage()" 
+                class="bg-indigo-600 text-white w-12 h-12 rounded-full hover:bg-indigo-700 transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center justify-center">
+                ➤
+            </button>
+        </div>
+    </div>
 
-<div class="w-full max-w-3xl bg-white rounded-xl shadow-lg flex flex-col h-[90vh] relative z-10">
+    <script>
+        const username = sessionStorage.getItem("username");
+        let room = sessionStorage.getItem("room") || "General";
+        if (!username) location.href = "index.html";
 
-<!-- HEADER -->
-<div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center relative">
+        const messagesDiv = document.getElementById("messages");
+        const input = document.getElementById("input");
+        const typingDiv = document.getElementById("typing");
+        const roomLabel = document.getElementById("roomLabel");
+        const roomMenu = document.getElementById("roomMenu");
+        const avatarsDiv = document.getElementById("avatars");
+        const onlineBar = document.getElementById("onlineBar");
+        const memberCount = document.getElementById("memberCount");
+        const fileInput = document.getElementById("fileInput");
+        const micBtn = document.getElementById("micBtn");
+        const mediaTray = document.getElementById("mediaTray");
+        const mediaName = document.getElementById("mediaName");
 
-  <h2 class="text-xl font-bold">💬 Chatterbox</h2>
+        let currentMedia = { data: null, type: null };
+        let mediaRecorder;
+        let audioChunks = [];
+        let typingInterval = null;
 
-  <div class="flex gap-2">
-    <!-- ROOM BUTTON -->
-    <button id="roomBtn"
-  class="bg-white/20 px-4 py-2 rounded-full
-         transition-all duration-300 ease-out
-         hover:bg-white/30 hover:scale-105
-         active:scale-95">
-  <span id="roomLabel">General</span>
-  <span class="inline-block ml-1 transition-transform duration-300 group-hover:rotate-180">⌄</span>
-</button>
+        // Session storage for room messages
+        const roomMessages = JSON.parse(sessionStorage.getItem("roomMessages")) || {};
 
-
-    <!-- LEAVE BUTTON -->
-    <button onclick="leaveChat()"
-      class="bg-white/20 px-4 py-2 rounded-full text-sm font-bold
-             hover:bg-red-500 hover:text-white transition">
-      Leave
-    </button>
-  </div>
-
-
-
-  <div id="roomMenu" class="hidden absolute right-6 top-16 bg-white rounded-lg shadow-lg w-40 text-slate-700">
-    <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="General">General</div>
-    <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Tech">Tech</div>
-    <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Fun">Fun</div>
-  </div>
-</div>
-
-<!-- ONLINE USERS -->
-<div id="onlineBar" class="hidden px-4 py-3 bg-slate-50 flex items-center justify-between border-b">
-  <div id="avatars" class="flex -space-x-2"></div>
-  <span id="memberCount" class="text-sm text-slate-500"></span>
-</div>
-
-<!-- MESSAGES -->
-<div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4">
-  <div id="emptyState" class="text-center text-slate-500 text-sm">
-    No messages yet. Start the conversation 👋
-  </div>
-</div>
-
-<!-- TYPING -->
-<div id="typing" class="px-4 h-7 text-slate-500"></div>
-
-<!-- INPUT -->
-<div class="p-4 border-t flex gap-2">
-  <input id="input"
-    class="flex-1 px-5 py-3 rounded-full bg-slate-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-    placeholder="Type a message...">
-  <button onclick="sendMessage()"
-  class="bg-indigo-600 text-white w-12 h-12 rounded-full
-         transition-all duration-300 ease-out
-         hover:bg-indigo-700 hover:scale-105
-         active:scale-95">
-  <span class="inline-block transition-transform duration-300 hover:translate-x-0.5">
-    ➤
-  </span>
-</button>
-
-</div>
-
-</div>
-
-<script>
-/* ================= SESSION ================= */
-const username = sessionStorage.getItem("username");
-let room = sessionStorage.getItem("room") || "General";
-if (!username) location.href = "index.html";
-sessionStorage.setItem("room", room);
-
-/* ================= STATE ================= */
-const messagesDiv = document.getElementById("messages");
-const input = document.getElementById("input");
-const typingDiv = document.getElementById("typing");
-const roomLabel = document.getElementById("roomLabel");
-const roomMenu = document.getElementById("roomMenu");
-const roomBtn = document.getElementById("roomBtn");
-
-const onlineBar = document.getElementById("onlineBar");
-const avatarsDiv = document.getElementById("avatars");
-const memberCount = document.getElementById("memberCount");
-
-roomLabel.textContent = room;
-
-const roomMessages = JSON.parse(sessionStorage.getItem("roomMessages")) || {};
-
-/* ===== REAL-TIME TYPING STATE ===== */
-let typingInterval = null;
-
-/* ================= SOCKET ================= */
-const WS_URL =
+        roomLabel.textContent = room;
+        const WS_URL =
   location.hostname === "localhost"
     ? "ws://localhost:8000/ws"
     : "wss://chatterbox-kil7.onrender.com/ws";
 
 const ws = new WebSocket(WS_URL);
 
-ws.onopen = () => {
-  ws.send(JSON.stringify({ username, room }));
-};
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ username, room }));
+            renderRoomMessages(room);
+        };
 
-ws.onmessage = (e) => {
-  const data = JSON.parse(e.data);
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === "chat") {
+                storeMessage(room, { 
+                    kind: "chat", 
+                    id: data.message_id, 
+                    user: data.username, 
+                    text: data.message, 
+                    time: data.timestamp 
+                });
+                renderChat(data.message_id, data.username, data.message, data.timestamp);
+            }
+            
+            if (data.type === "media") {
+                storeMessage(room, { 
+                    kind: "media", 
+                    id: data.message_id, 
+                    user: data.username, 
+                    text: data.message, 
+                    media: data.media,
+                    mediaType: data.mediaType,
+                    time: data.timestamp 
+                });
+                renderChat(data.message_id, data.username, data.message, data.timestamp, data.media, data.mediaType);
+            }
+            
+            if (data.type === "system") {
+                storeMessage(room, { 
+                    kind: "system", 
+                    text: data.message, 
+                    time: data.timestamp 
+                });
+                renderSystem(data.message, data.timestamp);
+            }
+            
+            if (data.type === "users") updateUsers(data.users);
+            if (data.type === "typing" && data.username !== username) showTyping(data.username);
+            if (data.type === "stop_typing") hideTyping();
+            if (data.type === "delete_message") deleteMessage(data.message_id);
+        };
 
-  if (data.type === "chat") {
-    storeMessage(room, { kind:"chat", user:data.username, text:data.message, time:data.time });
-    renderChat(data.username, data.message, data.time);
-  }
+        // Enter key to send
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
-  if (data.type === "system") {
-    storeMessage(room, { kind:"system", text:data.message, time:data.time });
-    renderSystem(data.message, data.time);
-  }
+        // File input
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                currentMedia.data = ev.target.result;
+                currentMedia.type = file.type.split('/')[0];
+                showMediaTray(file.name);
+            };
+            reader.readAsDataURL(file);
+        });
 
-  if (data.type === "users") {
-    updateUsers(data.users);
-  }
+        // Microphone
+        micBtn.onclick = async () => {
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            currentMedia.data = ev.target.result;
+                            currentMedia.type = "audio";
+                            showMediaTray("Voice Note 🎙️");
+                        };
+                        reader.readAsDataURL(blob);
+                    };
+                    mediaRecorder.start();
+                    micBtn.classList.add("bg-red-100", "animate-pulse");
+                } catch (err) {
+                    alert("Microphone access denied.");
+                }
+            } else {
+                mediaRecorder.stop();
+                micBtn.classList.remove("bg-red-100", "animate-pulse");
+            }
+        };
 
-  if (data.type === "typing" && data.username !== username) {
-    showTyping(data.username);
-  }
+        function showMediaTray(name) {
+            mediaTray.classList.remove("hidden");
+            mediaName.textContent = name;
+        }
 
-  if (data.type === "stop_typing") {
-    hideTyping();
-  }
-};
+        function clearMedia() {
+            currentMedia = { data: null, type: null };
+            mediaTray.classList.add("hidden");
+            fileInput.value = "";
+        }
 
-/* ================= INPUT EVENTS (REAL-TIME) ================= */
-input.addEventListener("input", () => {
-  const hasText = input.value.trim().length > 0;
+        function sendMessage() {
+            const text = input.value.trim();
+            if (!text && !currentMedia.data) return;
+            ws.send(JSON.stringify({
+                type: currentMedia.data ? "media" : "chat",
+                message: text,
+                media: currentMedia.data,
+                mediaType: currentMedia.type
+            }));
+            input.value = "";
+            clearMedia();
+            stopTyping();
+        }
 
-  if (hasText && !typingInterval) {
-    ws.send(JSON.stringify({ type: "typing" }));
+        function storeMessage(room, msg) {
+            if (!roomMessages[room]) roomMessages[room] = [];
+            roomMessages[room].push(msg);
+            sessionStorage.setItem("roomMessages", JSON.stringify(roomMessages));
+        }
 
-    typingInterval = setInterval(() => {
-      ws.send(JSON.stringify({ type: "typing" }));
-    }, 500); // heartbeat
-  }
+        function renderChat(messageId, user, text, time, mediaData = null, mediaType = null) {
+            removeEmpty();
+            const div = document.createElement("div");
+            const isMe = user === username;
+            div.className = `message-wrapper ${isMe ? "justify-end" : "justify-start"}`;
+            div.dataset.messageId = messageId;
 
-  if (!hasText && typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-    ws.send(JSON.stringify({ type: "stop_typing" }));
-  }
-});
+            let mediaHTML = "";
+            if (mediaData) {
+                if (mediaType === "image") {
+                    mediaHTML = `<img src="${mediaData}" class="mt-2 rounded-lg max-w-[250px] shadow-sm">`;
+                } else if (mediaType === "video") {
+                    mediaHTML = `<video src="${mediaData}" controls class="mt-2 rounded-lg max-w-[250px] shadow-sm"></video>`;
+                } else if (mediaType === "audio") {
+                    mediaHTML = `
+                        <div class="mt-2 p-3 bg-white/10 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs opacity-75">🎙️ Voice Message</span>
+                            </div>
+                            <audio src="${mediaData}" controls class="w-full max-w-[280px]"></audio>
+                        </div>
+                    `;
+                }
+            }
 
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+            const deleteBtn = isMe ? 
+                `<button onclick="deleteMyMessage('${messageId}')" class="delete-btn bg-red-500 text-white text-xs px-2 py-1 rounded-full hover:bg-red-600 shadow-lg">✕</button>` : '';
 
-/* ================= ROOM SWITCH ================= */
-roomBtn.onclick = () => roomMenu.classList.toggle("hidden");
+            div.innerHTML = `
+                <div class="message-bubble">
+                    ${deleteBtn}
+                    <div class="inline-block px-4 py-3 rounded-2xl shadow-sm ${isMe ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-800"}">
+                        <div class="flex items-center gap-3 mb-1">
+                            <strong class="text-sm font-bold">${user}</strong>
+                            <span class="text-[11px] opacity-70 whitespace-nowrap">${formatTime(time)}</span>
+                        </div>
+                        ${text ? `<p class="mt-1 break-words">${text}</p>` : ""}
+                        ${mediaHTML}
+                    </div>
+                </div>
+            `;
+            messagesDiv.appendChild(div);
+            scrollBottom();
+        }
 
-roomMenu.querySelectorAll("div").forEach(item => {
-  item.onclick = () => {
-    room = item.dataset.room;
-    sessionStorage.setItem("room", room);
-    roomLabel.textContent = room;
+        function renderSystem(text, time) {
+            removeEmpty();
+            const div = document.createElement("div");
+            div.className = "text-center text-xs text-slate-400 my-2";
+            div.textContent = `${text} • ${formatTime(time)}`;
+            messagesDiv.appendChild(div);
+            scrollBottom();
+        }
 
-    messagesDiv.innerHTML = "";
-    hideTyping();
-    onlineBar.classList.add("hidden");
-    renderRoomMessages(room);
+        function deleteMyMessage(messageId) {
+            if (confirm("Are you sure you want to delete this message? This action cannot be undone.")) {
+                ws.send(JSON.stringify({ type: "delete_message", message_id: messageId }));
+            }
+        }
 
-    ws.send(JSON.stringify({ type: "switch_room", room }));
-    roomMenu.classList.add("hidden");
-  };
-});
+        function deleteMessage(messageId) {
+            const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageDiv) {
+                messageDiv.innerHTML = `
+                    <div class="message-bubble">
+                        <div class="inline-block px-4 py-2 rounded-2xl shadow-sm bg-slate-200 text-slate-500 deleted-message">
+                            <p class="text-sm">🚫 This message was deleted</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Update session storage
+            if (roomMessages[room]) {
+                roomMessages[room] = roomMessages[room].filter(msg => msg.id !== messageId);
+                sessionStorage.setItem("roomMessages", JSON.stringify(roomMessages));
+            }
+        }
 
-/* ================= FUNCTIONS ================= */
-function leaveChat() {
-  const confirmLeave = confirm("Are you sure you want to leave the chat?");
-  if (!confirmLeave) return;
+        function renderRoomMessages(room) {
+            if (!roomMessages[room] || roomMessages[room].length === 0) {
+                return;
+            }
+            roomMessages[room].forEach(m => {
+                if (m.kind === "chat") {
+                    renderChat(m.id, m.user, m.text, m.time);
+                } else if (m.kind === "media") {
+                    renderChat(m.id, m.user, m.text, m.time, m.media, m.mediaType);
+                } else if (m.kind === "system") {
+                    renderSystem(m.text, m.time);
+                }
+            });
+        }
 
-  // notify server (optional but clean)
-  ws.send(JSON.stringify({ type: "leave" }));
+        input.addEventListener("input", () => {
+            if (!typingInterval && input.value.length > 0) {
+                ws.send(JSON.stringify({ type: "typing" }));
+                typingInterval = setInterval(() => ws.send(JSON.stringify({ type: "typing" })), 1000);
+            }
+            if (input.value.length === 0) stopTyping();
+        });
 
-  // close socket
-  ws.close();
+        function stopTyping() {
+            if (typingInterval) {
+                clearInterval(typingInterval);
+                typingInterval = null;
+                ws.send(JSON.stringify({ type: "stop_typing" }));
+            }
+        }
 
-  // clear session data
-  sessionStorage.removeItem("room");
-  sessionStorage.removeItem("roomMessages");
+        function showTyping(user) {
+            typingDiv.innerHTML = `
+                <div class="typing-wrapper">
+                    <span>${user} is typing</span>
+                    <div class="typing-dots">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </div>
+            `;
+        }
 
-  // redirect to login
-  window.location.href = "index.html";
-}
+        function hideTyping() {
+            typingDiv.innerHTML = "";
+        }
 
-function updateUsers(users) {
-  avatarsDiv.innerHTML = "";
-  if (!users || users.length === 0) {
-    onlineBar.classList.add("hidden");
-    return;
-  }
-  onlineBar.classList.remove("hidden");
+        function updateUsers(users) {
+            avatarsDiv.innerHTML = "";
+            if (!users || users.length === 0) {
+                onlineBar.classList.add("hidden");
+                return;
+            }
+            onlineBar.classList.remove("hidden");
+            users.forEach(u => {
+                const a = document.createElement("div");
+                a.className = "w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white";
+                a.textContent = u[0].toUpperCase();
+                avatarsDiv.appendChild(a);
+            });
+            memberCount.textContent = users.length + " online";
+        }
 
-  users.forEach(u => {
-    const a = document.createElement("div");
-    a.className =
-      "w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white";
-    a.textContent = u[0].toUpperCase();
-    avatarsDiv.appendChild(a);
-  });
+        function leaveChat() {
+            if (confirm("Leave chat?")) {
+                ws.close();
+                sessionStorage.removeItem("room");
+                sessionStorage.removeItem("roomMessages");
+                location.href = "index.html";
+            }
+        }
 
-  memberCount.textContent = users.length + " member" + (users.length>1?"s":"");
-}
+        function removeEmpty() {
+            const e = document.getElementById("emptyState");
+            if (e) e.remove();
+        }
 
-function sendMessage() {
-  if (!input.value.trim()) return;
+        function scrollBottom() {
+            messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
+        }
 
-  ws.send(JSON.stringify({ type:"chat", message:input.value }));
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
 
-  if (typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-    ws.send(JSON.stringify({ type:"stop_typing" }));
-  }
-
-  input.value = "";
-}
-
-function storeMessage(room, msg) {
-  if (!roomMessages[room]) roomMessages[room] = [];
-  roomMessages[room].push(msg);
-  sessionStorage.setItem("roomMessages", JSON.stringify(roomMessages));
-}
-
-function renderChat(user, text, time) {
-  removeEmpty();
-  const div = document.createElement("div");
-  div.className = user === username ? "text-right" : "text-left";
-  div.innerHTML = `
-    <div class="inline-block px-4 py-2 rounded-xl ${
-      user === username ? "bg-indigo-500 text-white" : "bg-slate-200"
-    }">
-      <strong>${user}</strong>
-      <span class="text-xs opacity-70 ml-2">${time || currentTime()}</span><br>
-      ${text}
-    </div>`;
-  messagesDiv.appendChild(div);
-  scrollBottom();
-}
-
-function renderSystem(text, time) {
-  removeEmpty();
-  const div = document.createElement("div");
-  div.className = "text-center text-xs text-slate-500";
-  div.textContent = `${text} • ${time || currentTime()}`;
-  messagesDiv.appendChild(div);
-  scrollBottom();
-}
-
-function renderRoomMessages(room) {
-  if (!roomMessages[room] || roomMessages[room].length === 0) {
-    messagesDiv.innerHTML =
-      `<div id="emptyState" class="text-center text-slate-500 text-sm">
-        No messages yet. Start the conversation 👋
-      </div>`;
-    return;
-  }
-  roomMessages[room].forEach(m =>
-    m.kind === "chat"
-      ? renderChat(m.user, m.text, m.time)
-      : renderSystem(m.text, m.time)
-  );
-}
-
-function showTyping(user) {
-  typingDiv.innerHTML = `
-    <div class="typing-wrapper">
-      <span>${user} is typing</span>
-      <div class="typing-dots">
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-      </div>
-    </div>`;
-}
-
-function hideTyping() {
-  typingDiv.innerHTML = "";
-}
-
-function removeEmpty() {
-  const e = document.getElementById("emptyState");
-  if (e) e.remove();
-}
-
-function scrollBottom() {
-  messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
-}
-
-function currentTime() {
-  return new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
-}
-
-renderRoomMessages(room);
-</script>
-
+        document.getElementById("roomBtn").onclick = () => roomMenu.classList.toggle("hidden");
+        roomMenu.querySelectorAll("div").forEach(item => {
+            item.onclick = () => {
+                const newRoom = item.dataset.room;
+                room = newRoom;
+                sessionStorage.setItem("room", room);
+                roomLabel.textContent = room;
+                ws.send(JSON.stringify({ type: "switch_room", room }));
+                messagesDiv.innerHTML = '<div id="emptyState" class="text-center text-slate-500 text-sm">No messages yet. 👋</div>';
+                hideTyping();
+                renderRoomMessages(room);
+                roomMenu.classList.add("hidden");
+            };
+        });
+    </script>
 </body>
 </html>
