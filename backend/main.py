@@ -5,6 +5,7 @@ import uuid
 
 app = FastAPI()
 
+
 @app.get("/")
 def root():
     return {
@@ -173,3 +174,4 @@ async def websocket(ws: WebSocket):
 
 if __name__ == "__main__":
     uvicorn.run(app)
+
