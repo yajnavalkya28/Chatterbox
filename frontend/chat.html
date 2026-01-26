@@ -517,9 +517,37 @@ const ws = new WebSocket(WS_URL);
         }
 
         function formatTime(isoString) {
-            const date = new Date(isoString);
-            return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        }
+    const tz = "Asia/Kolkata";
+
+    const date = new Date(isoString);
+    const now = new Date();
+
+    const istDate = new Date(date.toLocaleString("en-US", { timeZone: tz }));
+    const istNow  = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+
+    const sameDay =
+        istDate.getDate() === istNow.getDate() &&
+        istDate.getMonth() === istNow.getMonth() &&
+        istDate.getFullYear() === istNow.getFullYear();
+
+    return istDate.toLocaleString("en-IN", {
+        ...(sameDay
+            ? {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true
+              }
+            : {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true
+              })
+    });
+}
+
 
         document.getElementById("roomBtn").onclick = () => roomMenu.classList.toggle("hidden");
         roomMenu.querySelectorAll("div").forEach(item => {
@@ -538,3 +566,4 @@ const ws = new WebSocket(WS_URL);
     </script>
 </body>
 </html>
+
