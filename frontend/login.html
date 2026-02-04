@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatterbox | Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Animated gradient background */
+  .gradient-bg {
+    background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    animation: float linear infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(100vh) scale(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100px) scale(1);
+      opacity: 0;
+    }
+  }
+  
+  /* Glassmorphism card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Shimmer effect on logo */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 3s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  
+  /* Input focus effects */
+  .input-field {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .input-field:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.2);
+  }
+  
+  /* Button hover effects */
+  .btn-gradient {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-gradient:hover::before {
+    left: 100%;
+  }
+  
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
+  }
+  
+  .btn-gradient:active {
+    transform: translateY(0);
+  }
+  
+  /* Pulse animation for icon */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+  }
+  
+  .pulse-icon {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Select dropdown styling */
+  select option {
+    background: white;
+    color: #334155;
+  }
+  
+  /* Fade in animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center gradient-bg relative overflow-hidden">
+
+<!-- Realistic Particle Canvas Background -->
+<canvas id="particleCanvas" class="absolute inset-0 pointer-events-none"></canvas>
+
+<!-- Login Card -->
+<div class="relative glass-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden fade-in">
+
+  <!-- Header with gradient -->
+  <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-10 text-center text-white relative overflow-hidden">
+    <!-- Decorative circles -->
+    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+    
+    <div class="relative z-10">
+      <div class="mx-auto mb-4 w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center shimmer pulse-icon">
+        <span class="text-4xl">💬</span>
+      </div>
+      <h1 class="text-3xl font-bold mb-2 tracking-tight">Chatterbox</h1>
+      <p class="text-sm opacity-90 font-medium">
+        Connect, chat, and collaborate in real-time
+      </p>
+      <div class="mt-4 flex items-center justify-center gap-2 text-xs opacity-75">
+        <span>✨</span>
+        <span>Fast • Secure • Fun</span>
+        <span>✨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Section -->
+  <div class="p-8 space-y-5">
+    
+    <!-- Welcome message -->
+    <div class="text-center mb-2">
+      <h2 class="text-xl font-semibold text-slate-800 mb-1">Welcome Back!</h2>
+      <p class="text-sm text-slate-500">Enter your details to join the conversation</p>
+    </div>
+    
+    <!-- Username Input -->
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-2">
+        <span class="flex items-center gap-2">
+          <span>👤</span>
+          <span>Username</span>
+        </span>
+      </label>
+      <input id="username"
+        type="text"
+        placeholder="Enter your username"
+        maxlength="20"
+        class="input-field w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50">
+    </div>
+
+    <!-- Room Select -->
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-2">
+        <span class="flex items-center gap-2">
+          <span>🚪</span>
+          <span>Select Room</span>
+        </span>
+      </label>
+      <select id="room"
+        class="input-field w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer">
+        <option value="">Choose a room...</option>
+        <option value="General">💬 General</option>
+        <option value="Tech">💻 Tech</option>
+        <option value="Fun">🎉 Fun</option>
+      </select>
+    </div>
+
+    <!-- Join Button -->
+    <button onclick="login()"
+      class="btn-gradient w-full mt-6 py-4 rounded-xl text-white font-bold text-lg
+             bg-gradient-to-r from-indigo-600 to-purple-600
+             shadow-lg flex items-center justify-center gap-2">
+      <span>Join Chat</span>
+      <span class="text-xl">→</span>
+    </button>
+    
+    <!-- Footer info -->
+    <div class="pt-4 text-center">
+      <p class="text-xs text-slate-500">
+        By joining, you agree to our community guidelines
+      </p>
+    </div>
+  </div>
+  
+  <!-- Bottom accent -->
+  <div class="h-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500"></div>
+</div>
+
+<!-- Toast notification container -->
+<div id="toast" class="fixed top-4 right-4 hidden z-50">
+  <div class="bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-bounce">
+    <span class="text-xl">⚠️</span>
+    <span id="toastMessage" class="font-medium"></span>
+  </div>
+</div>
+
+<script>
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
+  toastMessage.textContent = message;
+  toast.classList.remove('hidden');
+  
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3000);
+}
+
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const room = document.getElementById("room").value;
+
+  if (!username) {
+    showToast("Please enter a username");
+    document.getElementById("username").focus();
+    return;
+  }
+  
+  if (username.length < 2) {
+    showToast("Username must be at least 2 characters");
+    document.getElementById("username").focus();
+    return;
+  }
+
+  if (!room) {
+    showToast("Please select a room");
+    document.getElementById("room").focus();
+    return;
+  }
+
+  // Add loading state
+  const button = event.target;
+  button.disabled = true;
+  button.innerHTML = '<span class="animate-spin">⏳</span> Joining...';
+
+  sessionStorage.setItem("username", username);
+  sessionStorage.setItem("room", room);
+
+  // Small delay for better UX
+  setTimeout(() => {
+    window.location.href = "chat.html";
+  }, 500);
+}
+
+// Enable Enter key to submit
+document.getElementById('username').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('room').focus();
+  }
+});
+
+document.getElementById('room').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    login();
+  }
+});
+
+// Auto-focus username field on load
+window.addEventListener('load', () => {
+  document.getElementById('username').focus();
+});
+
+// Realistic Particle System
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+class Particle {
+  constructor() {
+    this.reset();
+    this.y = Math.random() * canvas.height;
+    this.opacity = Math.random() * 0.5 + 0.3;
+  }
+  
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height + 10;
+    this.size = Math.random() * 3 + 1;
+    this.speedY = Math.random() * 1.5 + 0.5;
+    this.speedX = Math.random() * 0.5 - 0.25;
+    this.opacity = Math.random() * 0.5 + 0.3;
+  }
+  
+  update() {
+    this.y -= this.speedY;
+    this.x += this.speedX;
+    
+    if (this.y < -10) {
+      this.reset();
+    }
+    
+    if (this.x < 0 || this.x > canvas.width) {
+      this.speedX *= -1;
+    }
+  }
+  
+  draw() {
+    ctx.beginPath();
+    
+    // Create gradient for glow effect
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${this.opacity * 0.5})`);
+    gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+    
+    ctx.fillStyle = gradient;
+    ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Core particle
+    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// Create particles
+const particles = [];
+for (let i = 0; i < 80; i++) {
+  particles.push(new Particle());
+}
+
+// Connect nearby particles with lines
+function connectParticles() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < 120) {
+        ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - distance / 120) * 0.15})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+// Animation loop
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  particles.forEach(particle => {
+    particle.update();
+    particle.draw();
+  });
+  
+  connectParticles();
+  
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
