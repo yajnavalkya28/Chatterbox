@@ -5,7 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatterbox</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Dark mode variables */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --message-bg: #ffffff;
+            --my-message-bg: #6366f1;
+        }
+        
+        .dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --message-bg: #1e293b;
+            --my-message-bg: #6366f1;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-custom { border-color: var(--border-color); }
+        
+        /* Typing animation */
         .typing-wrapper {
             display: flex;
             align-items: center;
@@ -38,6 +82,8 @@
                 opacity: 1;
             }
         }
+        
+        /* Animated background bubbles */
         .bubble-bg {
             position: fixed;
             inset: 0;
@@ -48,9 +94,12 @@
         .bubble {
             position: absolute;
             bottom: -120px;
-            background: rgba(99, 102, 241, 0.18);
+            background: rgba(99, 102, 241, 0.1);
             border-radius: 9999px;
             animation: floatUp linear infinite;
+        }
+        .dark-mode .bubble {
+            background: rgba(99, 102, 241, 0.05);
         }
         @keyframes floatUp {
             0% {
@@ -65,16 +114,32 @@
                 opacity: 0;
             }
         }
+        
+        /* Message styling */
         .message-wrapper {
             position: relative;
             display: flex;
             margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
         }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .message-bubble {
             position: relative;
             max-width: 75%;
             word-wrap: break-word;
         }
+        
         .delete-btn {
             position: absolute;
             top: -8px;
@@ -86,77 +151,395 @@
         .message-wrapper:hover .delete-btn {
             opacity: 1;
         }
+        
         .deleted-message {
             font-style: italic;
             opacity: 0.6;
         }
+        
+        /* Scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Emoji picker */
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 280px;
+            z-index: 100;
+        }
+        
+        .emoji-btn {
+            font-size: 24px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        
+        .emoji-btn:hover {
+            background: var(--bg-tertiary);
+            transform: scale(1.2);
+        }
+        
+        /* Status indicator */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        /* Message input focus glow */
+        .input-glow:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Room badge */
+        .room-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 10px;
+            animation: bounceIn 0.5s;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* Settings panel */
+        .settings-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            min-width: 220px;
+            z-index: 100;
+        }
+        
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #6366f1;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Media preview */
+        .media-preview {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+        
+        /* Hover effects */
+        .hover-lift {
+            transition: all 0.2s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
-<body class="bg-slate-100 h-screen flex items-center justify-center">
-    <div class="bubble-bg">
-        <span class="bubble w-4 h-4 left-[5%] animate-[floatUp_14s_linear_infinite]"></span>
-        <span class="bubble w-10 h-10 left-[15%] animate-[floatUp_26s_linear_infinite]"></span>
-        <span class="bubble w-6 h-6 left-[40%] animate-[floatUp_22s_linear_infinite]"></span>
-        <span class="bubble w-10 h-10 left-[92%] animate-[floatUp_30s_linear_infinite]"></span>
-    </div>
 
-    <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg flex flex-col h-[90vh] relative z-10">
+<body class="h-screen flex items-center justify-center transition-colors duration-300">
+    
+    <!-- Realistic Particle Canvas Background -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Main Chat Container -->
+    <div class="w-full max-w-4xl bg-secondary rounded-2xl shadow-2xl flex flex-col h-[92vh] relative z-10 border border-custom">
+        
         <!-- HEADER -->
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold">💬 Chatterbox</h2>
-            <div class="flex gap-2">
-                <button id="roomBtn" 
-                    class="bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 ease-out hover:scale-105 active:scale-95">
-                    <span id="roomLabel">General</span> ⌄
-                </button>
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl shimmer">
+                    💬
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold">Chatterbox</h2>
+                    <div class="flex items-center gap-2 text-xs opacity-90">
+                        <div class="status-dot"></div>
+                        <span>Connected</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 items-center">
+                <!-- Room selector -->
+                <div class="relative">
+                    <button id="roomBtn" 
+                        class="room-badge px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <span id="roomLabel">General</span>
+                        <span class="text-sm">▾</span>
+                    </button>
+                    <div id="roomMenu" 
+                        class="hidden absolute right-0 top-12 bg-secondary border border-custom rounded-xl shadow-xl w-48 text-primary overflow-hidden z-50">
+                        <div class="px-4 py-3 hover:bg-tertiary cursor-pointer transition-colors flex items-center gap-2" data-room="General">
+                            <span>💬</span>
+                            <span class="font-medium">General</span>
+                        </div>
+                        <div class="px-4 py-3 hover:bg-tertiary cursor-pointer transition-colors flex items-center gap-2" data-room="Tech">
+                            <span>💻</span>
+                            <span class="font-medium">Tech</span>
+                        </div>
+                        <div class="px-4 py-3 hover:bg-tertiary cursor-pointer transition-colors flex items-center gap-2" data-room="Fun">
+                            <span>🎉</span>
+                            <span class="font-medium">Fun</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings button -->
+                <div class="relative">
+                    <button id="settingsBtn"
+                        class="room-badge w-10 h-10 rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95">
+                        ⚙️
+                    </button>
+                    <div id="settingsPanel" class="settings-panel hidden">
+                        <h3 class="font-bold text-sm mb-3 text-primary">Settings</h3>
+                        
+                        <div class="space-y-3">
+                            <!-- Dark mode toggle -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-secondary">Dark Mode</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="darkModeToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- Sound toggle -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-secondary">Sound Effects</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="soundToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- Notifications toggle -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-secondary">Notifications</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notifToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Leave button -->
                 <button onclick="leaveChat()" 
-                    class="bg-white/20 px-4 py-2 rounded-full hover:bg-red-500 transition-all duration-300">
+                    class="room-badge px-4 py-2 rounded-full hover:bg-red-500/80 transition-all duration-300 hover:scale-105 active:scale-95">
                     Leave
                 </button>
             </div>
-            <div id="roomMenu" 
-                class="hidden absolute right-6 top-16 bg-white rounded-lg shadow-lg w-40 text-slate-700 z-50">
-                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="General">General</div>
-                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Tech">Tech</div>
-                <div class="px-4 py-3 hover:bg-slate-100 cursor-pointer" data-room="Fun">Fun</div>
+        </div>
+
+        <!-- ONLINE USERS BAR -->
+        <div id="onlineBar" class="hidden px-6 py-3 bg-tertiary flex items-center justify-between border-b border-custom">
+            <div class="flex items-center gap-3">
+                <div id="avatars" class="flex -space-x-2"></div>
+                <span id="memberCount" class="text-sm text-secondary font-medium"></span>
+            </div>
+            <div class="text-xs text-secondary">
+                <span id="onlineStatus">🟢 Online</span>
             </div>
         </div>
 
-        <!-- ONLINE USERS -->
-        <div id="onlineBar" class="hidden px-4 py-3 bg-slate-50 flex items-center justify-between border-b">
-            <div id="avatars" class="flex -space-x-2"></div>
-            <span id="memberCount" class="text-sm text-slate-500"></span>
-        </div>
-
-        <!-- MESSAGES -->
-        <div id="messages" class="flex-1 overflow-y-auto p-4">
-            <div id="emptyState" class="text-center text-slate-500 text-sm">No messages yet. 👋</div>
+        <!-- MESSAGES AREA -->
+        <div id="messages" class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <div id="emptyState" class="text-center text-secondary text-sm py-8">
+                <div class="text-5xl mb-3">👋</div>
+                <p class="font-medium">No messages yet</p>
+                <p class="text-xs mt-1 opacity-75">Start the conversation!</p>
+            </div>
         </div>
 
         <!-- TYPING INDICATOR -->
-        <div id="typing" class="px-4 h-7 text-slate-500 text-sm"></div>
+        <div id="typing" class="px-6 h-8 text-secondary text-sm flex items-center"></div>
 
-        <!-- MEDIA TRAY -->
+        <!-- MEDIA PREVIEW TRAY -->
         <div id="mediaTray" 
-            class="hidden mx-4 flex items-center gap-3 p-2 bg-slate-50 rounded-lg border border-dashed border-indigo-300">
-            <span id="mediaName" class="text-xs text-indigo-600 font-medium truncate flex-1"></span>
-            <button onclick="clearMedia()" class="text-red-500 text-sm px-2">✕</button>
+            class="hidden mx-6 mb-2 flex items-center gap-3 p-3 bg-tertiary rounded-xl border-2 border-dashed border-indigo-400">
+            <div class="flex-1 flex items-center gap-2">
+                <span class="text-2xl">📎</span>
+                <span id="mediaName" class="text-sm text-primary font-medium truncate"></span>
+            </div>
+            <button onclick="clearMedia()" class="text-red-500 hover:text-red-600 font-bold px-3 py-1 hover:bg-red-50 rounded-lg transition">
+                ✕
+            </button>
         </div>
 
-        <!-- INPUT -->
-        <div class="p-4 border-t flex gap-2 items-center">
-            <label class="cursor-pointer hover:bg-slate-200 p-2 rounded-full transition">
-                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*">
-                <span class="text-xl">📎</span>
-            </label>
-            <button id="micBtn" class="hover:bg-slate-200 p-2 rounded-full transition text-xl">🎙️</button>
-            <input id="input" 
-                class="flex-1 px-5 py-3 rounded-full bg-slate-100 focus:ring-2 focus:ring-indigo-400 outline-none" 
-                placeholder="Type a message...">
-            <button onclick="sendMessage()" 
-                class="bg-indigo-600 text-white w-12 h-12 rounded-full hover:bg-indigo-700 transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center justify-center">
-                ➤
-            </button>
+        <!-- INPUT AREA -->
+        <div class="p-6 border-t border-custom">
+            <div class="flex gap-3 items-end">
+                <!-- Media attachment -->
+                <label class="cursor-pointer hover:bg-tertiary p-3 rounded-full transition-all hover:scale-110 active:scale-95">
+                    <input type="file" id="fileInput" class="hidden" accept="image/*,video/*">
+                    <span class="text-2xl">📎</span>
+                </label>
+                
+                <!-- Voice recording -->
+                <button id="micBtn" class="hover:bg-tertiary p-3 rounded-full transition-all hover:scale-110 active:scale-95 text-2xl">
+                    🎙️
+                </button>
+                
+                <!-- Emoji picker button -->
+                <div class="relative">
+                    <button id="emojiBtn" class="hover:bg-tertiary p-3 rounded-full transition-all hover:scale-110 active:scale-95 text-2xl">
+                        😊
+                    </button>
+                    <div id="emojiPicker" class="emoji-picker hidden custom-scrollbar">
+                        <div class="grid grid-cols-6 gap-1">
+                            <span class="emoji-btn">😀</span>
+                            <span class="emoji-btn">😂</span>
+                            <span class="emoji-btn">😍</span>
+                            <span class="emoji-btn">🥰</span>
+                            <span class="emoji-btn">😎</span>
+                            <span class="emoji-btn">🤔</span>
+                            <span class="emoji-btn">😢</span>
+                            <span class="emoji-btn">😭</span>
+                            <span class="emoji-btn">😡</span>
+                            <span class="emoji-btn">🤗</span>
+                            <span class="emoji-btn">🙌</span>
+                            <span class="emoji-btn">👍</span>
+                            <span class="emoji-btn">👎</span>
+                            <span class="emoji-btn">👏</span>
+                            <span class="emoji-btn">🙏</span>
+                            <span class="emoji-btn">❤️</span>
+                            <span class="emoji-btn">🔥</span>
+                            <span class="emoji-btn">✨</span>
+                            <span class="emoji-btn">🎉</span>
+                            <span class="emoji-btn">💯</span>
+                            <span class="emoji-btn">⚡</span>
+                            <span class="emoji-btn">🌟</span>
+                            <span class="emoji-btn">🎈</span>
+                            <span class="emoji-btn">🎊</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Message input -->
+                <input id="input" 
+                    class="flex-1 px-5 py-3.5 rounded-2xl bg-tertiary focus:ring-2 focus:ring-indigo-500 outline-none text-primary placeholder-secondary transition-all input-glow" 
+                    placeholder="Type a message...">
+                
+                <!-- Send button -->
+                <button onclick="sendMessage()" 
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white w-12 h-12 rounded-full hover:shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center justify-center font-bold text-xl">
+                    ➤
+                </button>
+            </div>
         </div>
     </div>
 
@@ -177,22 +560,33 @@
         const micBtn = document.getElementById("micBtn");
         const mediaTray = document.getElementById("mediaTray");
         const mediaName = document.getElementById("mediaName");
+        const emojiBtn = document.getElementById("emojiBtn");
+        const emojiPicker = document.getElementById("emojiPicker");
+        const settingsBtn = document.getElementById("settingsBtn");
+        const settingsPanel = document.getElementById("settingsPanel");
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const soundToggle = document.getElementById("soundToggle");
 
         let currentMedia = { data: null, type: null };
         let mediaRecorder;
         let audioChunks = [];
         let typingInterval = null;
+        let typingTimeout = null;
+        let lastMessageSender = null;
+        let soundEnabled = true;
+        let notificationsEnabled = true;
 
         // Session storage for room messages
         const roomMessages = JSON.parse(sessionStorage.getItem("roomMessages")) || {};
 
         roomLabel.textContent = room;
-       const WS_URL =
-  location.hostname === "localhost"
-    ? "ws://localhost:8000/ws"
-    : "wss://chatterbox-kil7.onrender.com/ws";
+        
+        // WebSocket connection
+        const WS_URL = location.hostname === "localhost"
+            ? "ws://localhost:8000/ws"
+            : "wss://chatterbox-kil7.onrender.com/ws";
 
-const ws = new WebSocket(WS_URL);
+        const ws = new WebSocket(WS_URL);
 
         ws.onopen = () => {
             ws.send(JSON.stringify({ username, room }));
@@ -203,98 +597,162 @@ const ws = new WebSocket(WS_URL);
             const data = JSON.parse(e.data);
             
             if (data.type === "chat") {
-                storeMessage(room, { 
-                    kind: "chat", 
-                    id: data.message_id, 
-                    user: data.username, 
-                    text: data.message, 
-                    time: data.timestamp 
-                });
                 renderChat(data.message_id, data.username, data.message, data.timestamp);
+                storeMessage(data.message_id, data.username, data.message, data.timestamp, "chat");
+                playSound('message');
+                showNotification(data.username, data.message);
             }
-            
-            if (data.type === "media") {
-                storeMessage(room, { 
-                    kind: "media", 
-                    id: data.message_id, 
-                    user: data.username, 
-                    text: data.message, 
-                    media: data.media,
-                    mediaType: data.mediaType,
-                    time: data.timestamp 
-                });
+            else if (data.type === "media") {
                 renderChat(data.message_id, data.username, data.message, data.timestamp, data.media, data.mediaType);
+                storeMessage(data.message_id, data.username, data.message, data.timestamp, "media", data.media, data.mediaType);
+                playSound('message');
             }
-            
-            if (data.type === "system") {
-                storeMessage(room, { 
-                    kind: "system", 
-                    text: data.message, 
-                    time: data.timestamp 
-                });
+            else if (data.type === "system") {
                 renderSystem(data.message, data.timestamp);
+                storeMessage(null, null, data.message, data.timestamp, "system");
+                playSound('system');
             }
-            
-            if (data.type === "users") updateUsers(data.users);
-            if (data.type === "typing" && data.username !== username) showTyping(data.username);
-            if (data.type === "stop_typing") hideTyping();
-            if (data.type === "delete_message") deleteMessage(data.message_id);
+            else if (data.type === "typing") {
+                if (data.username !== username) {
+                    showTyping(data.username);
+                }
+            }
+            else if (data.type === "stop_typing") {
+                hideTyping();
+            }
+            else if (data.type === "users") {
+                updateUsers(data.users);
+            }
+            else if (data.type === "delete_message") {
+                deleteMessage(data.message_id);
+            }
         };
 
-        // Enter key to send
-        input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                sendMessage();
+        // Dark mode handling
+        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (savedDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'false');
             }
         });
 
-        // File input
+        soundToggle.addEventListener('change', (e) => {
+            soundEnabled = e.target.checked;
+        });
+
+        // Settings panel toggle
+        settingsBtn.onclick = () => settingsPanel.classList.toggle('hidden');
+        
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!settingsBtn.contains(e.target) && !settingsPanel.contains(e.target)) {
+                settingsPanel.classList.add('hidden');
+            }
+            if (!emojiBtn.contains(e.target) && !emojiPicker.contains(e.target)) {
+                emojiPicker.classList.add('hidden');
+            }
+            if (!document.getElementById('roomBtn').contains(e.target) && !roomMenu.contains(e.target)) {
+                roomMenu.classList.add('hidden');
+            }
+        });
+
+        // Emoji picker
+        emojiBtn.onclick = () => emojiPicker.classList.toggle('hidden');
+        
+        emojiPicker.querySelectorAll('.emoji-btn').forEach(btn => {
+            btn.onclick = () => {
+                input.value += btn.textContent;
+                input.focus();
+                emojiPicker.classList.add('hidden');
+            };
+        });
+
+        // Sound effects
+        function playSound(type) {
+            if (!soundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (type === 'message') {
+                oscillator.frequency.value = 600;
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            } else if (type === 'system') {
+                oscillator.frequency.value = 400;
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            }
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Browser notifications
+        function showNotification(user, message) {
+            if (!notificationsEnabled || document.hasFocus()) return;
+            
+            if (Notification.permission === "granted") {
+                new Notification(`${user} in ${room}`, {
+                    body: message,
+                    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>💬</text></svg>"
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+        }
+
+        function sendMessage() {
+            const text = input.value.trim();
+            if (!text && !currentMedia.data) return;
+
+            if (currentMedia.data) {
+                ws.send(JSON.stringify({
+                    type: "media",
+                    message: text,
+                    media: currentMedia.data,
+                    mediaType: currentMedia.type
+                }));
+                clearMedia();
+            } else {
+                ws.send(JSON.stringify({ type: "chat", message: text }));
+            }
+
+            input.value = "";
+            stopTyping();
+            input.focus();
+        }
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
         fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = (ev) => {
                 currentMedia.data = ev.target.result;
-                currentMedia.type = file.type.split('/')[0];
-                showMediaTray(file.name);
+                currentMedia.type = file.type.startsWith("image") ? "image" : "video";
+                mediaTray.classList.remove("hidden");
+                mediaName.textContent = file.name;
             };
             reader.readAsDataURL(file);
         });
-
-        // Microphone
-        micBtn.onclick = async () => {
-            if (!mediaRecorder || mediaRecorder.state === "inactive") {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            currentMedia.data = ev.target.result;
-                            currentMedia.type = "audio";
-                            showMediaTray("Voice Note 🎙️");
-                        };
-                        reader.readAsDataURL(blob);
-                    };
-                    mediaRecorder.start();
-                    micBtn.classList.add("bg-red-100", "animate-pulse");
-                } catch (err) {
-                    alert("Microphone access denied.");
-                }
-            } else {
-                mediaRecorder.stop();
-                micBtn.classList.remove("bg-red-100", "animate-pulse");
-            }
-        };
-
-        function showMediaTray(name) {
-            mediaTray.classList.remove("hidden");
-            mediaName.textContent = name;
-        }
 
         function clearMedia() {
             currentMedia = { data: null, type: null };
@@ -302,64 +760,82 @@ const ws = new WebSocket(WS_URL);
             fileInput.value = "";
         }
 
-        function sendMessage() {
-            const text = input.value.trim();
-            if (!text && !currentMedia.data) return;
-            ws.send(JSON.stringify({
-                type: currentMedia.data ? "media" : "chat",
-                message: text,
-                media: currentMedia.data,
-                mediaType: currentMedia.type
-            }));
-            input.value = "";
-            clearMedia();
-            stopTyping();
-        }
+        micBtn.addEventListener("click", async () => {
+            if (!mediaRecorder) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
 
-        function storeMessage(room, msg) {
+                    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(audioChunks, { type: "audio/webm" });
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            currentMedia.data = e.target.result;
+                            currentMedia.type = "audio";
+                            mediaTray.classList.remove("hidden");
+                            mediaName.textContent = "Voice recording";
+                        };
+                        reader.readAsDataURL(blob);
+                    };
+
+                    mediaRecorder.start();
+                    micBtn.textContent = "⏹️";
+                    micBtn.classList.add("bg-red-500", "text-white");
+                } catch (err) {
+                    alert("Microphone access denied");
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder = null;
+                micBtn.textContent = "🎙️";
+                micBtn.classList.remove("bg-red-500", "text-white");
+            }
+        });
+
+        function storeMessage(id, user, text, time, kind, media = null, mediaType = null) {
             if (!roomMessages[room]) roomMessages[room] = [];
-            roomMessages[room].push(msg);
+            roomMessages[room].push({ id, user, text, time, kind, media, mediaType });
             sessionStorage.setItem("roomMessages", JSON.stringify(roomMessages));
         }
 
-        function renderChat(messageId, user, text, time, mediaData = null, mediaType = null) {
+        function renderChat(messageId, user, text, time, media = null, mediaType = null) {
             removeEmpty();
-            const div = document.createElement("div");
             const isMe = user === username;
-            div.className = `message-wrapper ${isMe ? "justify-end" : "justify-start"}`;
+            
+            // Check if we should show the username (only if different from last sender)
+            const showUsername = !isMe && (lastMessageSender !== user);
+            lastMessageSender = user;
+            
+            const div = document.createElement("div");
+            div.className = `message-wrapper ${isMe ? 'justify-end' : 'justify-start'}`;
             div.dataset.messageId = messageId;
+            div.dataset.sender = user;
 
-            let mediaHTML = "";
-            if (mediaData) {
+            const bubbleColor = isMe 
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white" 
+                : "bg-secondary border border-custom text-primary";
+
+            let mediaHtml = "";
+            if (media) {
                 if (mediaType === "image") {
-                    mediaHTML = `<img src="${mediaData}" class="mt-2 rounded-lg max-w-[250px] shadow-sm">`;
+                    mediaHtml = `<img src="${media}" class="media-preview" alt="shared image">`;
                 } else if (mediaType === "video") {
-                    mediaHTML = `<video src="${mediaData}" controls class="mt-2 rounded-lg max-w-[250px] shadow-sm"></video>`;
+                    mediaHtml = `<video src="${media}" class="media-preview" controls></video>`;
                 } else if (mediaType === "audio") {
-                    mediaHTML = `
-                        <div class="mt-2 p-3 bg-white/10 rounded-lg">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xs opacity-75">🎙️ Voice Message</span>
-                            </div>
-                            <audio src="${mediaData}" controls class="w-full max-w-[280px]"></audio>
-                        </div>
-                    `;
+                    mediaHtml = `<audio src="${media}" controls class="w-full mt-2"></audio>`;
                 }
             }
 
-            const deleteBtn = isMe ? 
-                `<button onclick="deleteMyMessage('${messageId}')" class="delete-btn bg-red-500 text-white text-xs px-2 py-1 rounded-full hover:bg-red-600 shadow-lg">✕</button>` : '';
-
             div.innerHTML = `
                 <div class="message-bubble">
-                    ${deleteBtn}
-                    <div class="inline-block px-4 py-3 rounded-2xl shadow-sm ${isMe ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-800"}">
-                        <div class="flex items-center gap-3 mb-1">
-                            <strong class="text-sm font-bold">${user}</strong>
-                            <span class="text-[11px] opacity-70 whitespace-nowrap">${formatTime(time)}</span>
-                        </div>
-                        ${text ? `<p class="mt-1 break-words">${text}</p>` : ""}
-                        ${mediaHTML}
+                    ${isMe ? `<button onclick="deleteMyMessage('${messageId}')" class="delete-btn bg-red-500 text-white w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-xs font-bold">✕</button>` : ''}
+                    <div class="inline-block px-4 py-3 rounded-2xl shadow-md ${bubbleColor} hover-lift">
+                        ${showUsername ? `<div class="font-semibold text-sm mb-1 opacity-90">${user}</div>` : ''}
+                        ${text ? `<p class="text-sm leading-relaxed">${text}</p>` : ''}
+                        ${mediaHtml}
+                        <div class="text-xs mt-1.5 opacity-75">${formatTime(time)}</div>
                     </div>
                 </div>
             `;
@@ -369,15 +845,27 @@ const ws = new WebSocket(WS_URL);
 
         function renderSystem(text, time) {
             removeEmpty();
+            // Reset last sender when system message appears
+            lastMessageSender = null;
+            
             const div = document.createElement("div");
-            div.className = "text-center text-xs text-slate-400 my-2";
-            div.textContent = `${text} • ${formatTime(time)}`;
-            messagesDiv.appendChild(div);
+            div.className = "text-center text-xs text-secondary my-3 px-4 py-2 bg-tertiary rounded-full inline-block mx-auto";
+            div.innerHTML = `
+                <div class="flex items-center justify-center gap-2">
+                    <span>${text}</span>
+                    <span class="opacity-60">•</span>
+                    <span class="opacity-60">${formatTime(time)}</span>
+                </div>
+            `;
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex justify-center";
+            wrapper.appendChild(div);
+            messagesDiv.appendChild(wrapper);
             scrollBottom();
         }
 
         function deleteMyMessage(messageId) {
-            if (confirm("Are you sure you want to delete this message? This action cannot be undone.")) {
+            if (confirm("Delete this message? This action cannot be undone.")) {
                 ws.send(JSON.stringify({ type: "delete_message", message_id: messageId }));
             }
         }
@@ -385,11 +873,12 @@ const ws = new WebSocket(WS_URL);
         function deleteMessage(messageId) {
             const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
             if (messageDiv) {
+                const sender = messageDiv.dataset.sender;
                 const isMyMessage = messageDiv.classList.contains('justify-end');
                 messageDiv.className = `message-wrapper ${isMyMessage ? 'justify-end' : 'justify-start'}`;
                 messageDiv.innerHTML = `
                     <div class="message-bubble">
-                        <div class="inline-block px-4 py-3 rounded-2xl shadow-sm bg-slate-200 text-slate-500 deleted-message">
+                        <div class="inline-block px-4 py-3 rounded-2xl shadow-sm bg-tertiary text-secondary deleted-message">
                             <div class="flex items-center gap-2">
                                 <span class="text-lg">🚫</span>
                                 <div>
@@ -400,9 +889,13 @@ const ws = new WebSocket(WS_URL);
                         </div>
                     </div>
                 `;
+                
+                // Reset last sender if this was the last message
+                if (lastMessageSender === sender) {
+                    lastMessageSender = null;
+                }
             }
             
-            // Update session storage
             if (roomMessages[room]) {
                 roomMessages[room] = roomMessages[room].map(msg => {
                     if (msg.id === messageId) {
@@ -420,14 +913,13 @@ const ws = new WebSocket(WS_URL);
             }
             roomMessages[room].forEach(m => {
                 if (m.deleted) {
-                    // Render deleted message placeholder
                     removeEmpty();
                     const div = document.createElement("div");
                     div.className = `message-wrapper ${m.user === username ? 'justify-end' : 'justify-start'}`;
                     div.dataset.messageId = m.id;
                     div.innerHTML = `
                         <div class="message-bubble">
-                            <div class="inline-block px-4 py-3 rounded-2xl shadow-sm bg-slate-200 text-slate-500 deleted-message">
+                            <div class="inline-block px-4 py-3 rounded-2xl shadow-sm bg-tertiary text-secondary deleted-message">
                                 <div class="flex items-center gap-2">
                                     <span class="text-lg">🚫</span>
                                     <div>
@@ -466,9 +958,15 @@ const ws = new WebSocket(WS_URL);
         }
 
         function showTyping(user) {
+            // Clear any existing timeout
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+            
             typingDiv.innerHTML = `
                 <div class="typing-wrapper">
-                    <span>${user} is typing</span>
+                    <span class="font-medium">${user}</span>
+                    <span class="text-xs">is typing</span>
                     <div class="typing-dots">
                         <span class="typing-dot"></span>
                         <span class="typing-dot"></span>
@@ -476,9 +974,19 @@ const ws = new WebSocket(WS_URL);
                     </div>
                 </div>
             `;
+            
+            // Auto-hide typing indicator after 3 seconds of inactivity
+            typingTimeout = setTimeout(() => {
+                hideTyping();
+            }, 3000);
         }
 
         function hideTyping() {
+            // Clear the timeout when manually hiding
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+                typingTimeout = null;
+            }
             typingDiv.innerHTML = "";
         }
 
@@ -491,15 +999,18 @@ const ws = new WebSocket(WS_URL);
             onlineBar.classList.remove("hidden");
             users.forEach(u => {
                 const a = document.createElement("div");
-                a.className = "w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white";
+                const colors = ['bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-blue-500', 'bg-green-500'];
+                const colorClass = colors[u.charCodeAt(0) % colors.length];
+                a.className = `w-9 h-9 ${colorClass} text-white rounded-full flex items-center justify-center text-sm font-bold border-2 border-white shadow-md hover-lift cursor-pointer`;
                 a.textContent = u[0].toUpperCase();
+                a.title = u;
                 avatarsDiv.appendChild(a);
             });
-            memberCount.textContent = users.length + " online";
+            memberCount.textContent = `${users.length} ${users.length === 1 ? 'member' : 'members'} online`;
         }
 
         function leaveChat() {
-            if (confirm("Leave chat?")) {
+            if (confirm("Are you sure you want to leave the chat?")) {
                 ws.close();
                 sessionStorage.removeItem("room");
                 sessionStorage.removeItem("roomMessages");
@@ -517,37 +1028,35 @@ const ws = new WebSocket(WS_URL);
         }
 
         function formatTime(isoString) {
-    const tz = "Asia/Kolkata";
+            const tz = "Asia/Kolkata";
+            const date = new Date(isoString);
+            const now = new Date();
 
-    const date = new Date(isoString);
-    const now = new Date();
+            const istDate = new Date(date.toLocaleString("en-US", { timeZone: tz }));
+            const istNow = new Date(now.toLocaleString("en-US", { timeZone: tz }));
 
-    const istDate = new Date(date.toLocaleString("en-US", { timeZone: tz }));
-    const istNow  = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+            const sameDay =
+                istDate.getDate() === istNow.getDate() &&
+                istDate.getMonth() === istNow.getMonth() &&
+                istDate.getFullYear() === istNow.getFullYear();
 
-    const sameDay =
-        istDate.getDate() === istNow.getDate() &&
-        istDate.getMonth() === istNow.getMonth() &&
-        istDate.getFullYear() === istNow.getFullYear();
-
-    return istDate.toLocaleString("en-IN", {
-        ...(sameDay
-            ? {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true
-              }
-            : {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true
-              })
-    });
-}
-
+            return istDate.toLocaleString("en-IN", {
+                ...(sameDay
+                    ? {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                      }
+                    : {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                      })
+            });
+        }
 
         document.getElementById("roomBtn").onclick = () => roomMenu.classList.toggle("hidden");
         roomMenu.querySelectorAll("div").forEach(item => {
@@ -557,13 +1066,228 @@ const ws = new WebSocket(WS_URL);
                 sessionStorage.setItem("room", room);
                 roomLabel.textContent = room;
                 ws.send(JSON.stringify({ type: "switch_room", room }));
-                messagesDiv.innerHTML = '<div id="emptyState" class="text-center text-slate-500 text-sm">No messages yet. 👋</div>';
+                messagesDiv.innerHTML = '<div id="emptyState" class="text-center text-secondary text-sm py-8"><div class="text-5xl mb-3">👋</div><p class="font-medium">No messages yet</p><p class="text-xs mt-1 opacity-75">Start the conversation!</p></div>';
                 hideTyping();
+                lastMessageSender = null; // Reset last sender when switching rooms
                 renderRoomMessages(room);
                 roomMenu.classList.add("hidden");
+            };
+        });
+
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            input.focus();
+        });
+
+        // Request notification permission
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
+        // ==========================================
+        // REALISTIC PARTICLE SYSTEM FOR EACH ROOM
+        // ==========================================
+        
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Room-specific configurations
+        const roomConfigs = {
+            General: {
+                particleCount: 60,
+                color: { r: 99, g: 102, b: 241 }, // Indigo
+                connectionDistance: 150,
+                speed: { min: 0.3, max: 1 },
+                size: { min: 1, max: 3 },
+                pattern: 'network' // Network connection pattern
+            },
+            Tech: {
+                particleCount: 80,
+                color: { r: 34, g: 211, b: 238 }, // Cyan
+                connectionDistance: 100,
+                speed: { min: 0.5, max: 1.5 },
+                size: { min: 1, max: 4 },
+                pattern: 'matrix' // Matrix/digital rain effect
+            },
+            Fun: {
+                particleCount: 100,
+                color: { r: 236, g: 72, b: 153 }, // Pink
+                connectionDistance: 120,
+                speed: { min: 0.2, max: 1.2 },
+                size: { min: 2, max: 5 },
+                pattern: 'confetti' // Colorful confetti pattern
+            }
+        };
+
+        let currentConfig = roomConfigs[room];
+
+        class Particle {
+            constructor(config) {
+                this.config = config;
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * (this.config.size.max - this.config.size.min) + this.config.size.min;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * (this.config.speed.max - this.config.speed.min) + this.config.speed.min;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.pulseSpeed = Math.random() * 0.02 + 0.01;
+                this.pulsePhase = Math.random() * Math.PI * 2;
+                
+                // Fun room - random colors
+                if (this.config.pattern === 'confetti') {
+                    const colors = [
+                        { r: 236, g: 72, b: 153 },  // Pink
+                        { r: 251, g: 191, b: 36 },  // Yellow
+                        { r: 16, g: 185, b: 129 },  // Green
+                        { r: 139, g: 92, b: 246 },  // Purple
+                        { r: 59, g: 130, b: 246 }   // Blue
+                    ];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                } else {
+                    this.color = this.config.color;
+                }
+            }
+            
+            update() {
+                // Tech room - Matrix effect (particles fall down)
+                if (this.config.pattern === 'matrix') {
+                    this.y += Math.abs(this.vy) * 1.5;
+                    this.x += this.vx * 0.2;
+                    
+                    if (this.y > canvas.height + 10) {
+                        this.y = -10;
+                        this.x = Math.random() * canvas.width;
+                    }
+                } 
+                // Other patterns - random movement
+                else {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    // Bounce off edges
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+                
+                // Pulsing effect
+                this.pulsePhase += this.pulseSpeed;
+                this.currentOpacity = this.opacity + Math.sin(this.pulsePhase) * 0.2;
+            }
+            
+            draw() {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const baseOpacity = isDarkMode ? this.currentOpacity * 0.6 : this.currentOpacity * 0.8;
+                
+                ctx.beginPath();
+                
+                // Glow effect
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+                gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${baseOpacity})`);
+                gradient.addColorStop(0.4, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${baseOpacity * 0.5})`);
+                gradient.addColorStop(1, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Core particle
+                ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${baseOpacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Tech room - add digital square effect
+                if (this.config.pattern === 'matrix' && Math.random() > 0.7) {
+                    ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${baseOpacity * 0.5})`;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(this.x - this.size * 2, this.y - this.size * 2, this.size * 4, this.size * 4);
+                }
+            }
+        }
+
+        let particles = [];
+        
+        function initParticles() {
+            particles = [];
+            currentConfig = roomConfigs[room];
+            for (let i = 0; i < currentConfig.particleCount; i++) {
+                particles.push(new Particle(currentConfig));
+            }
+        }
+        
+        initParticles();
+
+        // Connect particles with lines (network pattern)
+        function connectParticles() {
+            if (currentConfig.pattern !== 'network') return;
+            
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < currentConfig.connectionDistance) {
+                        const opacity = (1 - distance / currentConfig.connectionDistance) * 0.15;
+                        const finalOpacity = isDarkMode ? opacity * 0.5 : opacity;
+                        
+                        ctx.strokeStyle = `rgba(${currentConfig.color.r}, ${currentConfig.color.g}, ${currentConfig.color.b}, ${finalOpacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            connectParticles();
+            
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Listen for room changes to update particle system
+        const originalRoomChange = roomMenu.querySelectorAll("div");
+        originalRoomChange.forEach(item => {
+            const originalClick = item.onclick;
+            item.onclick = function() {
+                originalClick.call(this);
+                // Reinitialize particles for new room
+                setTimeout(() => {
+                    initParticles();
+                }, 100);
             };
         });
     </script>
 </body>
 </html>
-
